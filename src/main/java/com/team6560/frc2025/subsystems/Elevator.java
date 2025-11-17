@@ -4,7 +4,8 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 import com.ctre.phoenix6.configs.Slot0Configs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
-import com.ctre.phoenix6.controls.PositionVoltage;
+import com.ctre.phoenix6.configs.MotionMagicConfigs;
+import com.ctre.phoenix6.controls.MotionMagicVoltage;
 // import com.ctre.phoenix6.controls.VelocityVoltage;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.NeutralModeValue;
@@ -50,23 +51,35 @@ public class Elevator extends SubsystemBase {
         this.topLimitSwitch = new DigitalInput(ElevatorConstants.ELEV_UPPER_LIMIT_SWITCH_ID);
         this.bottomLimitSwitch = new DigitalInput(ElevatorConstants.ELEV_LOWER_LIMIT_SWITCH_ID);
 
+        // Feedforward + Feedback configuration
         Slot0Configs elevatorPID = new Slot0Configs();
 
-        elevatorPID.kS = 0;
-        elevatorPID.kG = 0.4; // 0.4
+        // Feedforward gains (physics-based model)
+        elevatorPID.kS = 0.25;  // Overcome static friction
+        elevatorPID.kG = 0.4;   // Counteract gravity (already tuned)
+        elevatorPID.kV = 0.12;  // Velocity feedforward (adjust if needed)
+        elevatorPID.kA = 0.01;  // Acceleration feedforward
 
-        elevatorPID.kP = 0.7; // 0.7
-        elevatorPID.kI = 0.01; // this is the integral term, which is used to eliminate steady-state error
-        elevatorPID.kD = 0; 
+        // Feedback gains (reduced - feedforward does most of the work)
+        elevatorPID.kP = 0.1;   // Reduced from 0.7 - just for small corrections
+        elevatorPID.kI = 0.0;   // Disabled - not needed with good feedforward
+        elevatorPID.kD = 0.0;   // Disabled - motion profiling handles damping
+
+        // Motion Magic configuration (smooth trapezoidal motion profile)
+        MotionMagicConfigs motionMagicConfig = new MotionMagicConfigs();
+        motionMagicConfig.MotionMagicCruiseVelocity = 80;   // Max velocity (rotations/sec) - tune as needed
+        motionMagicConfig.MotionMagicAcceleration = 160;    // Max acceleration (rotations/sec²) - tune as needed
+        motionMagicConfig.MotionMagicJerk = 1600;           // Jerk for smoothness (rotations/sec³)
 
         TalonFXConfiguration config = new TalonFXConfiguration();
 
         config.MotorOutput.NeutralMode = NeutralModeValue.Brake;
         config.CurrentLimits.SupplyCurrentLimit = 40;
         config.CurrentLimits.SupplyCurrentLimitEnable = true;
-        
-        m_leftElev.getConfigurator().apply(config.withSlot0(elevatorPID));
-        m_rightElev.getConfigurator().apply(config.withSlot0(elevatorPID));
+
+        // Apply both PID and Motion Magic configs
+        m_leftElev.getConfigurator().apply(config.withSlot0(elevatorPID).withMotionMagic(motionMagicConfig));
+        m_rightElev.getConfigurator().apply(config.withSlot0(elevatorPID).withMotionMagic(motionMagicConfig));
 
         ntHeight.setDouble(0.0);
         ntTargetPos.setDouble(0.0);
@@ -89,7 +102,8 @@ public class Elevator extends SubsystemBase {
 
     public void setElevatorPosition(double targetrotelev) {
         this.targetPos = targetrotelev;
-        final PositionVoltage m_request = new PositionVoltage(targetrotelev);
+        // Use Motion Magic for smooth trapezoidal motion profile
+        final MotionMagicVoltage m_request = new MotionMagicVoltage(targetrotelev);
 
         m_leftElev.setControl(m_request);
         m_rightElev.setControl(m_request);
