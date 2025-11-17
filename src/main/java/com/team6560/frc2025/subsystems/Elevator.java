@@ -38,6 +38,10 @@ public class Elevator extends SubsystemBase {
     private final NetworkTable ntTable = NetworkTableInstance.getDefault().getTable("Elevator");
     private final NetworkTableEntry ntHeight = ntTable.getEntry("Height");
     private final NetworkTableEntry ntTargetPos = ntTable.getEntry("Target height");
+    private final NetworkTableEntry ntLeftCurrent = ntTable.getEntry("Left Current (A)");
+    private final NetworkTableEntry ntRightCurrent = ntTable.getEntry("Right Current (A)");
+    private final NetworkTableEntry ntPositionError = ntTable.getEntry("Position Error");
+    private final NetworkTableEntry ntVelocity = ntTable.getEntry("Velocity");
 
     public Elevator() {
         this.m_leftElev = new TalonFX(ElevatorConstants.ELEV_LEFT_ID, "Canivore");
@@ -77,7 +81,10 @@ public class Elevator extends SubsystemBase {
     public void updateNTTable(){
         ntHeight.setDouble(getElevatorHeight());
         ntTargetPos.setDouble(this.targetPos);
-
+        ntLeftCurrent.setDouble(m_leftElev.getSupplyCurrent().getValueAsDouble());
+        ntRightCurrent.setDouble(m_rightElev.getSupplyCurrent().getValueAsDouble());
+        ntPositionError.setDouble(Math.abs(this.targetPos - getElevatorHeight()));
+        ntVelocity.setDouble(getElevatorVelocity());
     }
 
     public void setElevatorPosition(double targetrotelev) {
