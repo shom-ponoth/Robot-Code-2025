@@ -20,17 +20,14 @@ public class PipeGrabber extends SubsystemBase {
 
 
     private static final int GRABBER_MOTOR_ID = 17;
-    private static final double INTAKE_SPEED = 0.5;
-    private static final double OUTTAKE_SPEED = -0.32;
+    private static final double INTAKE_SPEED = 0.05;
+    private static final double OUTTAKE_SPEED = -0.01;
     private static final double OUTTAKE_SPEED_L1 = -0.29;
 
     // This is your constructor. Creates a new PipeGrabber.
     public PipeGrabber() {
         this.m_grabberMotor = new SparkFlex(GRABBER_MOTOR_ID, MotorType.kBrushless);
-        // This is for telemetry.
-        ntDispTab("Grabber")
-            .add("Grabber Duty Cycle", this::getDutyCycle);
-    
+
         SparkFlexConfig config = new SparkFlexConfig();
 
         config.closedLoop
@@ -39,8 +36,17 @@ public class PipeGrabber extends SubsystemBase {
             .d(0)
             .outputRange(-0.9, 0.9);
 
+        // Apply configuration to the motor
+        m_grabberMotor.configure(config);
+
         m_controller = m_grabberMotor.getClosedLoopController();
         m_encoder = m_grabberMotor.getEncoder();
+
+        // This is for telemetry.
+        ntDispTab("Grabber")
+            .add("Grabber Duty Cycle", this::getDutyCycle)
+            .add("Grabber Current (A)", this::getOutputCurrent)
+            .add("Grabber Encoder", this::getEncoder);
     }
 
     public void runOuttakePositionBased(){
@@ -63,7 +69,7 @@ public class PipeGrabber extends SubsystemBase {
 
     // These follow the same structure as above!
     public void runIntakeMaxSpeed() {
-        m_grabberMotor.set(1.0);
+        m_grabberMotor.set(0.02);
     }
 
     public void runGrabberOuttake(){
