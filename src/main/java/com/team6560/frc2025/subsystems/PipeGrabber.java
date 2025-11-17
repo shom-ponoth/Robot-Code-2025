@@ -6,6 +6,8 @@ import static com.team6560.frc2025.utility.NetworkTable.NtValueDisplay.ntDispTab
 
 import com.revrobotics.RelativeEncoder;
 import com.revrobotics.spark.SparkBase.ControlType;
+import com.revrobotics.spark.SparkBase.PersistMode;
+import com.revrobotics.spark.SparkBase.ResetMode;
 import com.revrobotics.spark.SparkClosedLoopController;
 import com.revrobotics.spark.SparkFlex;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -37,7 +39,7 @@ public class PipeGrabber extends SubsystemBase {
             .outputRange(-0.9, 0.9);
 
         // Apply configuration to the motor
-        m_grabberMotor.configure(config);
+        m_grabberMotor.configure(config, ResetMode.kNoResetSafeParameters, PersistMode.kPersistParameters);
 
         m_controller = m_grabberMotor.getClosedLoopController();
         m_encoder = m_grabberMotor.getEncoder();
