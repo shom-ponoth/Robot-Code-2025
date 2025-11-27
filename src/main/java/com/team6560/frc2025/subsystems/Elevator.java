@@ -56,14 +56,14 @@ public class Elevator extends SubsystemBase {
 
         // Feedforward gains (physics-based model)
         elevatorPID.kS = 0.25;  // Overcome static friction
-        elevatorPID.kG = 0.4;   // Counteract gravity (already tuned)
+        elevatorPID.kG = 0.45;  // Counteract gravity (increased to help prevent slamming)
         elevatorPID.kV = 0.12;  // Velocity feedforward (adjust if needed)
         elevatorPID.kA = 0.01;  // Acceleration feedforward
 
-        // Feedback gains (reduced - feedforward does most of the work)
-        elevatorPID.kP = 0.1;   // Reduced from 0.7 - just for small corrections
+        // Feedback gains (tuned to prevent slamming on descent)
+        elevatorPID.kP = 0.5;   // Increased from 0.1 - provides stronger control against gravity
         elevatorPID.kI = 0.0;   // Disabled - not needed with good feedforward
-        elevatorPID.kD = 0.0;   // Disabled - motion profiling handles damping
+        elevatorPID.kD = 0.05;  // Added damping to slow down descents and prevent slamming
 
         // Motion Magic configuration (smooth trapezoidal motion profile)
         MotionMagicConfigs motionMagicConfig = new MotionMagicConfigs();
