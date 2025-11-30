@@ -67,9 +67,9 @@ public class Elevator extends SubsystemBase {
 
         // Motion Magic configuration (smooth trapezoidal motion profile)
         MotionMagicConfigs motionMagicConfig = new MotionMagicConfigs();
-        motionMagicConfig.MotionMagicCruiseVelocity = 80;   // Max velocity (rotations/sec) - tune as needed
-        motionMagicConfig.MotionMagicAcceleration = 160;    // Max acceleration (rotations/sec²) - tune as needed
-        motionMagicConfig.MotionMagicJerk = 1600;           // Jerk for smoothness (rotations/sec³)
+        motionMagicConfig.MotionMagicCruiseVelocity = 40;   // Reduced velocity for gentler descent
+        motionMagicConfig.MotionMagicAcceleration = 60;     // Reduced acceleration to prevent slamming
+        motionMagicConfig.MotionMagicJerk = 800;            // Reduced jerk for smoother start/stop
 
         TalonFXConfiguration config = new TalonFXConfiguration();
 
